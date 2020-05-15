@@ -1,0 +1,11 @@
+[package]
+name = "brainfrick"
+version = "1.0.0"
+description = "A brainfuck interpreter with helpful errors."
+repository = "https://github.com/Purpzie/brainfrick"
+authors = ["Purpzie"]
+license = "MIT"
+edition = "2018"
+
+[dependencies]
+itertools = "^0.9.0"
