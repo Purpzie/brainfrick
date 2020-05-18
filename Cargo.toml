@@ -1,6 +1,6 @@
 [package]
 name = "brainfrick"
-version = "1.0.0" # remember to change html_root_url
+version = "1.1.0" # remember to change html_root_url and readme
 description = "An optimizing brainfuck interpreter with helpful errors."
 repository = "https://github.com/Purpzie/brainfrick"
 authors = ["Purpzie"]

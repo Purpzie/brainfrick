@@ -6,6 +6,7 @@ pub struct Error {
     kind: ErrorKind,
     index: Index,
     brainfuck: Arc<String>,
+    output: Option<String>,
 }
 
 /** The types of [`Errors`](Error) that can be encountered. */
@@ -75,12 +76,24 @@ impl Error {
         self.brainfuck()
     }
 
+    /// The output produced before the error occurred, if applicable.
     #[inline]
-    pub(crate) fn new(kind: ErrorKind, index: Index, brainfuck: Arc<String>) -> Self {
+    pub fn output(&self) -> Option<&str> {
+        self.output.as_deref()
+    }
+
+    #[inline]
+    pub(crate) fn new(
+        kind: ErrorKind,
+        index: Index,
+        brainfuck: Arc<String>,
+        output: Option<String>,
+    ) -> Self {
         Self {
             kind,
             index,
             brainfuck,
+            output,
         }
     }
 }

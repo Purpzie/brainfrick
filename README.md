@@ -1,6 +1,6 @@
 # Brainfrick
 ![Build](https://github.com/Purpzie/brainfrick/workflows/CI/badge.svg)
-![crates.io](https://img.shields.io/crates/v/brainfrick)
+![crates.io](https://img.shields.io/crates/v/brainfrick.svg)
 
 A brainfuck interpreter with helpful errors. [See the documentation.](https://docs.rs/brainfrick)
 
@@ -9,7 +9,7 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-brainfrick = "1.0.0"
+brainfrick = "1.1.0"
 ```
 
 ### Example

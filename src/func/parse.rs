@@ -15,6 +15,7 @@ macro_rules! error {
             $crate::error::ErrorKind::UnmatchedBracket,
             $index,
             $code,
+            None,
         ))
     };
 }

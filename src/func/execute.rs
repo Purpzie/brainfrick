@@ -41,9 +41,26 @@ pub(crate) fn execute<I: Iterator<Item = u8>>(
                 ErrorKind::MaxSteps,
                 brainfuck.indexes[index],
                 brainfuck.code.clone(), // Arc
+                make_output(output),
             ));
         }
     }
 
-    Ok(String::from_utf8_lossy(&output).into_owned())
+    Ok(make_output(output).unwrap_or_default())
+}
+
+// this function exists because Cow clones when using into_owned(), and we want to avoid that when possible
+#[inline]
+fn make_output(output: Vec<u8>) -> Option<String> {
+    use std::borrow::Cow;
+
+    if output.is_empty() {
+        None
+    } else {
+        Some(match String::from_utf8_lossy(&output) {
+            // safety: if the result is borrowed it is always valid utf-8
+            Cow::Borrowed(_) => unsafe { String::from_utf8_unchecked(output) },
+            Cow::Owned(s) => s,
+        })
+    }
 }
