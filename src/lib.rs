@@ -21,6 +21,7 @@
 */
 
 #![allow(clippy::match_bool)]
+#![doc(html_root_url = "https://docs.rs/brainfrick/1.0.0")]
 
 mod error;
 mod func;
@@ -91,6 +92,9 @@ impl Brainfuck {
     /**
         Run some brainfuck.
 
+        # Errors
+        May return an [`Error`] of kind [`UnmatchedBracket`](ErrorKind::UnmatchedBracket) or [`MaxSteps`](ErrorKind::MaxSteps).
+
         # Example
         ```
         # use brainfrick::Brainfuck;
@@ -112,6 +116,9 @@ impl Brainfuck {
 
     /**
         Run some brainfuck with input.
+
+        # Errors
+        May return an [`Error`] of kind [`UnmatchedBracket`](ErrorKind::UnmatchedBracket) or [`MaxSteps`](ErrorKind::MaxSteps).
 
         # Example
         ```
@@ -138,6 +145,9 @@ impl Brainfuck {
 
         This essentially just creates a [`Brainfuck`] struct.
 
+        # Errors
+        May return an [`UnmatchedBracket`](ErrorKind::UnmatchedBracket) error.
+
         # Example
         ```
         # use brainfrick::Brainfuck;
@@ -161,9 +171,32 @@ impl Brainfuck {
         func::parse(std::sync::Arc::new(code.into()), Self::MAX_STEPS)
     }
 
-    /// Run the brainfuck.
-    ///
-    /// Note that, for a single [`Brainfuck`], this will always output the same result.
+    /**
+        Run the brainfuck.
+
+        Note that, for a single [`Brainfuck`], this will always output the same result.
+
+        # Errors
+        May return a [`MaxSteps`](ErrorKind::MaxSteps) error.
+
+        # Example
+        ```
+        # use brainfrick::Brainfuck;
+        let purpzie = Brainfuck::parse("
+            ++++++++[>++++++++++<-]>.<++[>++++++++++<-]+++[>+++++<-]>+
+            +.---.--.++++++++++.<++[>----------<-]>+++.----.<+++++++[>
+            ----------<-]>+.<++++++++[>++++++++++<-]>+++.++.<+++[>----
+            --<-]>.++++++++.++++++++.<++++++++[>----------<-]>--.
+        ")?;
+
+        // ...later
+
+        let sucks = purpzie.run()?;
+
+        assert_eq!(sucks, "Purpzie sucks!");
+        # Ok::<(), brainfrick::Error>(())
+        ```
+    */
     #[inline]
     pub fn run(&self) -> Result<String, Error> {
         func::execute(self, std::iter::empty())
@@ -171,6 +204,9 @@ impl Brainfuck {
 
     /**
         Run the brainfuck with input.
+
+        # Errors
+        May return a [`MaxSteps`](ErrorKind::MaxSteps) error.
 
         # Example
         ```
