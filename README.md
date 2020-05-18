@@ -1,6 +1,6 @@
 # Brainfrick
-![Build](https://github.com/Purpzie/brainfrick/workflows/CI/badge.svg)
-![crates.io](https://img.shields.io/crates/v/brainfrick.svg)
+[![Build](https://github.com/Purpzie/brainfrick/workflows/CI/badge.svg)](https://github.com/Purpzie/brainfrick/actions?query=workflow%3ACI)
+[![crates.io](https://img.shields.io/crates/v/brainfrick.svg)](https://crates.io/crates/brainfrick)
 
 A brainfuck interpreter with helpful errors. [See the documentation.](https://docs.rs/brainfrick)
 
