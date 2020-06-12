@@ -1,5 +1,5 @@
 use super::{
-    error::{Error, Index},
+    error::{Error, ErrorKind::UnmatchedBracket, Index},
     step::{
         Loop::*,
         Step::{self, *},
@@ -9,17 +9,6 @@ use super::{
 
 use itertools::Itertools;
 use std::sync::Arc;
-
-macro_rules! error {
-    ($index:expr, $code:expr) => {
-        Err(Error::new(
-            $crate::error::ErrorKind::UnmatchedBracket,
-            $index,
-            $code,
-            None,
-        ))
-    };
-}
 
 pub(crate) fn parse(code: String, max_steps: usize) -> Result<Brainfuck, Error> {
     let code = Arc::new(code);
@@ -75,7 +64,14 @@ pub(crate) fn parse(code: String, max_steps: usize) -> Result<Brainfuck, Error> 
                     *jump = matching_i;
                     *matching_jump = i;
                 }
-                None => return error!(indexes[i], code),
+                None => {
+                    return Err(Error {
+                        kind: UnmatchedBracket,
+                        index: indexes[i],
+                        brainfuck: code,
+                        output: None,
+                    })
+                }
             },
             _ => (),
         }
@@ -89,7 +85,12 @@ pub(crate) fn parse(code: String, max_steps: usize) -> Result<Brainfuck, Error> 
             code,
             max_steps,
         }),
-        Some((i, _)) => error!(indexes[i], code),
+        Some((i, _)) => Err(Error {
+            kind: UnmatchedBracket,
+            index: indexes[i],
+            brainfuck: code,
+            output: None,
+        }),
     }
 }
 

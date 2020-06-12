@@ -21,23 +21,23 @@ impl Memory {
         }
     }
 
-    #[inline]
+    #[inline(always)]
     pub fn add(&mut self, amount: i8) {
         let c = &mut self.cells[self.pointer];
         *c = c.wrapping_add(amount as u8);
     }
 
-    #[inline]
+    #[inline(always)]
     pub fn cell(&self) -> u8 {
         self.cells[self.pointer]
     }
 
-    #[inline]
+    #[inline(always)]
     pub fn set_cell(&mut self, c: u8) {
         self.cells[self.pointer] = c;
     }
 
-    #[inline]
+    #[inline(always)] // only called from one location so this is okay
     pub fn move_pointer(&mut self, amount: isize) {
         if amount >= 0 {
             self.pointer += amount as usize;
@@ -47,11 +47,14 @@ impl Memory {
         } else {
             let amount = (-amount) as usize;
             if amount <= self.pointer {
+                // safe to subtract
                 self.pointer -= amount;
             } else {
+                // we'll need to do some trickery here
                 let offset = amount - self.pointer;
                 self.pointer = 0;
                 self.offset += offset;
+                // VecDeque doesn't have resize_front() D:
                 self.cells.reserve(offset);
                 for _ in 0..offset {
                     self.cells.push_front(0);
@@ -61,13 +64,12 @@ impl Memory {
     }
 
     // technically, you can move usize::MAX cells away from the center
-    // that is bigger than isize::MAX, so return a usize with a bool indicating its sign
-    #[inline]
+    // that is bigger than isize::MAX, so return a usize with its sign
+    #[inline(always)]
     pub fn pointer(&self) -> (usize, bool) {
-        if self.pointer >= self.offset {
-            (self.pointer - self.offset, true)
-        } else {
-            (self.offset - self.pointer, false)
+        match self.pointer >= self.offset {
+            true => (self.pointer - self.offset, true),
+            false => (self.offset - self.pointer, false),
         }
     }
 }

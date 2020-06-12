@@ -4,18 +4,14 @@ use super::{
     step::Step::*,
     Brainfuck,
 };
+use std::sync::Arc;
 
 pub(crate) fn execute(brainfuck: &Brainfuck, input: Option<&str>) -> Result<String, Error> {
+    let mut input = input.unwrap_or_default().bytes();
     let mut output: Vec<u8> = Vec::new();
     let mut mem = Memory::new();
     let mut index: usize = 0;
     let mut step_count: usize = 0;
-
-    let mut input = match input {
-        Some(s) => s,
-        None => "",
-    }
-    .bytes();
 
     while index < brainfuck.steps.len() {
         match brainfuck.steps[index] {
@@ -25,12 +21,15 @@ pub(crate) fn execute(brainfuck: &Brainfuck, input: Option<&str>) -> Result<Stri
             Input => mem.set_cell(input.next().unwrap_or(0)),
             Loop(kind, jump) if kind.should_jump(&mem) => index = jump,
             Debug => {
-                let (pointer, positive) = mem.pointer();
+                let (pointer, sign) = mem.pointer();
                 let s = format!(
                     "[{}{},{}]",
-                    if positive { "" } else { "-" },
+                    match sign {
+                        true => "",
+                        false => "-",
+                    },
                     pointer,
-                    mem.cell()
+                    mem.cell(),
                 );
                 output.append(&mut s.into_bytes());
             }
@@ -39,13 +38,13 @@ pub(crate) fn execute(brainfuck: &Brainfuck, input: Option<&str>) -> Result<Stri
 
         index += 1;
         step_count += 1;
-        if step_count == brainfuck.max_steps {
-            return Err(Error::new(
-                ErrorKind::MaxSteps,
-                brainfuck.indexes[index],
-                brainfuck.code.clone(), // Arc
-                make_output(output),
-            ));
+        if step_count >= brainfuck.max_steps {
+            return Err(Error {
+                kind: ErrorKind::MaxSteps,
+                index: brainfuck.indexes[index],
+                brainfuck: Arc::clone(&brainfuck.code),
+                output: make_output(output),
+            });
         }
     }
 
