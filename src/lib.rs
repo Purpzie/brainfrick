@@ -29,6 +29,7 @@ mod mem;
 mod step;
 
 pub use error::{Error, ErrorKind};
+use std::sync::Arc;
 
 /**
     A struct that parses and runs brainfuck.
@@ -80,7 +81,7 @@ pub use error::{Error, ErrorKind};
 pub struct Brainfuck {
     steps: Vec<step::Step>,
     indexes: Vec<error::Index>,
-    code: std::sync::Arc<String>,
+    code: Arc<String>,
     /// The maximum number of 'steps' that will be run before stopping. Defaults to [`Brainfuck::MAX_STEPS`].
     pub max_steps: usize,
 }
@@ -168,7 +169,7 @@ impl Brainfuck {
     */
     #[inline]
     pub fn parse<S: Into<String>>(code: S) -> Result<Brainfuck, Error> {
-        func::parse(std::sync::Arc::new(code.into()), Self::MAX_STEPS)
+        func::parse(code.into(), Self::MAX_STEPS)
     }
 
     /**
@@ -199,7 +200,7 @@ impl Brainfuck {
     */
     #[inline]
     pub fn run(&self) -> Result<String, Error> {
-        func::execute(self, std::iter::empty())
+        func::execute(self, None)
     }
 
     /**
@@ -221,7 +222,7 @@ impl Brainfuck {
     */
     #[inline]
     pub fn input<S: AsRef<str>>(&self, input: S) -> Result<String, Error> {
-        func::execute(self, input.as_ref().bytes())
+        func::execute(self, Some(input.as_ref()))
     }
 
     /**

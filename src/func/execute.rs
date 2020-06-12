@@ -5,14 +5,17 @@ use super::{
     Brainfuck,
 };
 
-pub(crate) fn execute<I: Iterator<Item = u8>>(
-    brainfuck: &Brainfuck,
-    mut input: I,
-) -> Result<String, Error> {
+pub(crate) fn execute(brainfuck: &Brainfuck, input: Option<&str>) -> Result<String, Error> {
     let mut output: Vec<u8> = Vec::new();
     let mut mem = Memory::new();
     let mut index: usize = 0;
     let mut step_count: usize = 0;
+
+    let mut input = match input {
+        Some(s) => s,
+        None => "",
+    }
+    .bytes();
 
     while index < brainfuck.steps.len() {
         match brainfuck.steps[index] {
@@ -53,7 +56,6 @@ pub(crate) fn execute<I: Iterator<Item = u8>>(
 #[inline]
 fn make_output(output: Vec<u8>) -> Option<String> {
     use std::borrow::Cow;
-
     if output.is_empty() {
         None
     } else {

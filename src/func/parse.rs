@@ -8,6 +8,7 @@ use super::{
 };
 
 use itertools::Itertools;
+use std::sync::Arc;
 
 macro_rules! error {
     ($index:expr, $code:expr) => {
@@ -20,7 +21,8 @@ macro_rules! error {
     };
 }
 
-pub(crate) fn parse(code: std::sync::Arc<String>, max_steps: usize) -> Result<Brainfuck, Error> {
+pub(crate) fn parse(code: String, max_steps: usize) -> Result<Brainfuck, Error> {
+    let code = Arc::new(code);
     let mut indexes = Vec::with_capacity(code.len());
 
     // in order for helpful errors to point out where they came from, every step must be stored with its corresponding index
@@ -94,7 +96,7 @@ pub(crate) fn parse(code: std::sync::Arc<String>, max_steps: usize) -> Result<Br
 #[cfg(test)]
 #[test]
 fn test() {
-    let p = parse(std::sync::Arc::new("+[+++++>>>++<<-]".to_string()), 0).unwrap();
+    let p = parse("+[+++++>>>++<<-]".to_string(), 0).unwrap();
     assert_eq!(
         p.steps,
         vec![
