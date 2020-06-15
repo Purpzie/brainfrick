@@ -4,11 +4,10 @@ use super::{
     step::Step::*,
     Brainfuck,
 };
+use std::sync::Arc;
 
-pub(crate) fn execute<I: Iterator<Item = u8>>(
-    brainfuck: &Brainfuck,
-    mut input: I,
-) -> Result<String, Error> {
+pub(crate) fn execute(brainfuck: &Brainfuck, input: Option<&str>) -> Result<String, Error> {
+    let mut input = input.unwrap_or_default().bytes();
     let mut output: Vec<u8> = Vec::new();
     let mut mem = Memory::new();
     let mut index: usize = 0;
@@ -22,12 +21,15 @@ pub(crate) fn execute<I: Iterator<Item = u8>>(
             Input => mem.set_cell(input.next().unwrap_or(0)),
             Loop(kind, jump) if kind.should_jump(&mem) => index = jump,
             Debug => {
-                let (pointer, positive) = mem.pointer();
+                let (pointer, sign) = mem.pointer();
                 let s = format!(
                     "[{}{},{}]",
-                    if positive { "" } else { "-" },
+                    match sign {
+                        true => "",
+                        false => "-",
+                    },
                     pointer,
-                    mem.cell()
+                    mem.cell(),
                 );
                 output.append(&mut s.into_bytes());
             }
@@ -36,13 +38,13 @@ pub(crate) fn execute<I: Iterator<Item = u8>>(
 
         index += 1;
         step_count += 1;
-        if step_count == brainfuck.max_steps {
-            return Err(Error::new(
-                ErrorKind::MaxSteps,
-                brainfuck.indexes[index],
-                brainfuck.code.clone(), // Arc
-                make_output(output),
-            ));
+        if step_count >= brainfuck.max_steps {
+            return Err(Error {
+                kind: ErrorKind::MaxSteps,
+                index: brainfuck.indexes[index],
+                brainfuck: Arc::clone(&brainfuck.code),
+                output: make_output(output),
+            });
         }
     }
 
@@ -50,10 +52,8 @@ pub(crate) fn execute<I: Iterator<Item = u8>>(
 }
 
 // this function exists because Cow clones when using into_owned(), and we want to avoid that when possible
-#[inline]
 fn make_output(output: Vec<u8>) -> Option<String> {
     use std::borrow::Cow;
-
     if output.is_empty() {
         None
     } else {

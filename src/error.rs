@@ -1,35 +1,12 @@
 use std::{fmt, sync::Arc};
 
 /** An error originating from this crate. */
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Error {
-    kind: ErrorKind,
-    index: Index,
-    brainfuck: Arc<String>,
-    output: Option<String>,
-}
-
-/** The types of [`Errors`](Error) that can be encountered. */
-#[non_exhaustive]
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum ErrorKind {
-    /// A bracket `[]` was found without a matching bracket.
-    UnmatchedBracket,
-    /// The [maximum number of steps](crate::Brainfuck::max_steps) was reached.
-    MaxSteps,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub(crate) struct Index {
-    line: usize,
-    col: usize,
-}
-
-impl Index {
-    #[inline]
-    pub fn new(line: usize, col: usize) -> Self {
-        Self { line, col }
-    }
+    pub(crate) kind: ErrorKind,
+    pub(crate) index: Index,
+    pub(crate) brainfuck: Arc<String>,
+    pub(crate) output: Option<String>,
 }
 
 impl Error {
@@ -71,7 +48,7 @@ impl Error {
     }
 
     /// An alias for [`Error::brainfuck`].
-    #[inline(always)]
+    #[inline]
     pub fn brainfrick(&self) -> &str {
         self.brainfuck()
     }
@@ -81,38 +58,14 @@ impl Error {
     pub fn output(&self) -> Option<&str> {
         self.output.as_deref()
     }
-
-    #[inline]
-    pub(crate) fn new(
-        kind: ErrorKind,
-        index: Index,
-        brainfuck: Arc<String>,
-        output: Option<String>,
-    ) -> Self {
-        Self {
-            kind,
-            index,
-            brainfuck,
-            output,
-        }
-    }
-}
-
-impl fmt::Display for ErrorKind {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        use ErrorKind::*;
-        f.write_str(match self {
-            UnmatchedBracket => "Unmatched bracket",
-            MaxSteps => "Max steps reached",
-        })
-    }
 }
 
 impl std::error::Error for Error {}
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        // description and location
         let Index { line, col } = self.index;
+
+        // description and location
         writeln!(f, "{} @ line {} col {}", self.kind, line + 1, col + 1)?;
 
         // get snippet range (try to get 10 chars on either side)
@@ -121,7 +74,6 @@ impl fmt::Display for Error {
             Some(num) => (num, num != 0, 11),
             None => (0, false, col + 1),
         };
-
         let mut end = col + 10;
         let dots_end = end < line.len();
         if !dots_end {
@@ -133,12 +85,45 @@ impl fmt::Display for Error {
             f.write_str("...")?;
             offset += 3;
         }
-
         f.write_str(&line[start..end])?;
-
         if dots_end {
             f.write_str("...")?;
         }
+
+        // add ^ indicator
         write!(f, "\n{0:>1$}", "^", offset)
+    }
+}
+
+/** The types of [`Errors`](Error) that can be encountered. */
+#[non_exhaustive]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ErrorKind {
+    /// A bracket `[]` was found without a matching bracket.
+    UnmatchedBracket,
+    /// The [maximum number of steps](crate::Brainfuck::max_steps) was reached.
+    MaxSteps,
+}
+
+impl fmt::Display for ErrorKind {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        f.write_str(match self {
+            Self::UnmatchedBracket => "Unmatched bracket",
+            Self::MaxSteps => "Max steps reached",
+        })
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) struct Index {
+    pub line: usize,
+    pub col: usize,
+}
+
+// alternate syntax to create
+impl Index {
+    #[inline]
+    pub fn new(line: usize, col: usize) -> Self {
+        Self { line, col }
     }
 }
