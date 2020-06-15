@@ -15,7 +15,7 @@ pub(crate) enum Loop {
 }
 
 impl Loop {
-    #[inline(always)]
+    #[inline]
     pub fn should_jump(self, mem: &crate::mem::Memory) -> bool {
         let c = mem.cell() == 0;
         match self {

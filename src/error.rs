@@ -11,19 +11,19 @@ pub struct Error {
 
 impl Error {
     /// The [`kind`](ErrorKind) of error.
-    #[inline(always)]
+    #[inline]
     pub fn kind(&self) -> ErrorKind {
         self.kind
     }
 
     /// The line of brainfuck this error occurred on (starting from 0).
-    #[inline(always)]
+    #[inline]
     pub fn line(&self) -> usize {
         self.index.line
     }
 
     /// The column of brainfuck this error occurred on (starting from 0).
-    #[inline(always)]
+    #[inline]
     pub fn col(&self) -> usize {
         self.index.col
     }
@@ -42,19 +42,19 @@ impl Error {
         assert_eq!(code, result.brainfuck());
         ```
     */
-    #[inline(always)]
+    #[inline]
     pub fn brainfuck(&self) -> &str {
         &self.brainfuck
     }
 
     /// An alias for [`Error::brainfuck`].
-    #[inline(always)]
+    #[inline]
     pub fn brainfrick(&self) -> &str {
         self.brainfuck()
     }
 
     /// The output produced before the error occurred, if applicable.
-    #[inline(always)]
+    #[inline]
     pub fn output(&self) -> Option<&str> {
         self.output.as_deref()
     }
@@ -122,7 +122,7 @@ pub(crate) struct Index {
 
 // alternate syntax to create
 impl Index {
-    #[inline(always)]
+    #[inline]
     pub fn new(line: usize, col: usize) -> Self {
         Self { line, col }
     }

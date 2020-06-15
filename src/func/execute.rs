@@ -52,7 +52,6 @@ pub(crate) fn execute(brainfuck: &Brainfuck, input: Option<&str>) -> Result<Stri
 }
 
 // this function exists because Cow clones when using into_owned(), and we want to avoid that when possible
-#[inline]
 fn make_output(output: Vec<u8>) -> Option<String> {
     use std::borrow::Cow;
     if output.is_empty() {

@@ -21,23 +21,22 @@ impl Memory {
         }
     }
 
-    #[inline(always)]
+    #[inline]
     pub fn add(&mut self, amount: i8) {
         let c = &mut self.cells[self.pointer];
         *c = c.wrapping_add(amount as u8);
     }
 
-    #[inline(always)]
+    #[inline]
     pub fn cell(&self) -> u8 {
         self.cells[self.pointer]
     }
 
-    #[inline(always)]
+    #[inline]
     pub fn set_cell(&mut self, c: u8) {
         self.cells[self.pointer] = c;
     }
 
-    #[inline(always)] // only called from one location so this is okay
     pub fn move_pointer(&mut self, amount: isize) {
         if amount >= 0 {
             self.pointer += amount as usize;
@@ -65,7 +64,7 @@ impl Memory {
 
     // technically, you can move usize::MAX cells away from the center
     // that is bigger than isize::MAX, so return a usize with its sign
-    #[inline(always)]
+    #[inline]
     pub fn pointer(&self) -> (usize, bool) {
         match self.pointer >= self.offset {
             true => (self.pointer - self.offset, true),
