@@ -65,7 +65,7 @@ fn unmatched_left_bracket() -> Result {
                 assert!(e.line() == 0, "Expected line 0, got {}", e.line());
                 assert!(e.col() == 25, "Expected col 25, got {}", e.col());
                 Ok(())
-            },
+            }
             kind => panic!("Wrong error kind: {:?}", kind),
         },
     }
@@ -82,7 +82,7 @@ fn unmatched_right_bracket() -> Result {
                 assert!(e.line() == 0, "Expected line 0, got {}", e.line());
                 assert!(e.col() == 25, "Expected col 25, got {}", e.col());
                 Ok(())
-            },
+            }
             kind => panic!("Wrong error kind: {:?}", kind),
         },
     }

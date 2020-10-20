@@ -24,11 +24,13 @@
 #![doc(html_root_url = "https://docs.rs/brainfrick/1.1.2")]
 
 mod error;
-mod func;
+mod execute;
 mod mem;
+mod parse;
 mod step;
 
-use func::{execute, parse};
+use execute::execute;
+use parse::parse;
 use std::sync::Arc;
 
 pub use error::{Error, ErrorKind};
