@@ -1,3 +1,6 @@
+# 1.1.2
+- Refactored & slightly faster
+
 # 1.1.1
 - Removed a confusing usage of trait objects
 - General cleanup/optimization

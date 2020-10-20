@@ -43,7 +43,7 @@ fn big_array_left() -> Result {
 
 #[test]
 fn obscure() -> Result {
-    // Had to remove the '?' in this example
+    // had to remove the '?' in this example
     let r = Brainfuck::execute(
         "
         []++++++++++[>>+>+>++++++[<<+<+++>>>-]<<<<-]
@@ -57,12 +57,16 @@ fn obscure() -> Result {
 
 #[test]
 fn unmatched_left_bracket() -> Result {
-    let r = Brainfuck::parse("+++++[>+++++++>++<<-]>.>.[");
+    let r = Brainfuck::parse("+++++[>+++++++>++<<-]>.>.[-----");
     match r {
         Ok(..) => panic!("Unmatched left bracket was not caught"),
         Err(e) => match e.kind() {
-            ErrorKind::UnmatchedBracket => Ok(()),
-            kind @ _ => panic!("Wrong error kind: {:?}", kind),
+            ErrorKind::UnmatchedBracket => {
+                assert!(e.line() == 0, "Expected line 0, got {}", e.line());
+                assert!(e.col() == 25, "Expected col 25, got {}", e.col());
+                Ok(())
+            },
+            kind => panic!("Wrong error kind: {:?}", kind),
         },
     }
 }
@@ -74,7 +78,11 @@ fn unmatched_right_bracket() -> Result {
     match r {
         Ok(..) => panic!("Unmatched right bracket was not caught"),
         Err(e) => match e.kind() {
-            ErrorKind::UnmatchedBracket => Ok(()),
+            ErrorKind::UnmatchedBracket => {
+                assert!(e.line() == 0, "Expected line 0, got {}", e.line());
+                assert!(e.col() == 25, "Expected col 25, got {}", e.col());
+                Ok(())
+            },
             kind => panic!("Wrong error kind: {:?}", kind),
         },
     }

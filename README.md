@@ -9,7 +9,7 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-brainfrick = "1.1.1"
+brainfrick = "1.1.2"
 ```
 
 ### Example

@@ -21,15 +21,17 @@
 */
 
 #![allow(clippy::match_bool)]
-#![doc(html_root_url = "https://docs.rs/brainfrick/1.1.1")]
+#![doc(html_root_url = "https://docs.rs/brainfrick/1.1.2")]
 
 mod error;
 mod func;
 mod mem;
 mod step;
 
-pub use error::{Error, ErrorKind};
+use func::{execute, parse};
 use std::sync::Arc;
+
+pub use error::{Error, ErrorKind};
 
 /**
     A struct that parses and runs brainfuck.
@@ -50,7 +52,8 @@ use std::sync::Arc;
     ```
 
     ## The debug character
-    To aid whoever is crazy enough to write in brainfuck, the question mark `?` will output the current cell number and value.
+    To aid whoever is crazy enough to write in brainfuck, the question mark `?` will output the
+    current cell number and value.
 
     ```
     # use brainfrick::Brainfuck;
@@ -60,8 +63,9 @@ use std::sync::Arc;
     ```
 
     ## Memory details
-    Memory is infinite in both directions. In order to prevent malicious brainfuck from running forever, there is a configurable,
-    maximum number of 'steps' you can allow to be executed before stopping.
+    Memory is infinite in both directions. In order to prevent malicious brainfuck from running
+    forever, there is a configurable, maximum number of 'steps' you can allow to be executed before
+    stopping.
 
     ```
     # use brainfrick::Brainfuck;
@@ -82,7 +86,8 @@ pub struct Brainfuck {
     steps: Vec<step::Step>,
     indexes: Vec<error::Index>,
     code: Arc<String>,
-    /// The maximum number of 'steps' that will be run before stopping. Defaults to [`Brainfuck::MAX_STEPS`].
+    /// The maximum number of 'steps' that will be run before stopping. Defaults to
+    /// [`Brainfuck::MAX_STEPS`].
     pub max_steps: usize,
 }
 
@@ -94,7 +99,8 @@ impl Brainfuck {
         Run some brainfuck.
 
         # Errors
-        May return an [`Error`] of kind [`UnmatchedBracket`](ErrorKind::UnmatchedBracket) or [`MaxSteps`](ErrorKind::MaxSteps).
+        May return an [`Error`] of kind [`UnmatchedBracket`](ErrorKind::UnmatchedBracket) or
+        [`MaxSteps`](ErrorKind::MaxSteps).
 
         # Example
         ```
@@ -110,7 +116,6 @@ impl Brainfuck {
         # Ok::<(), brainfrick::Error>(())
         ```
     */
-    #[inline]
     pub fn execute<S: Into<String>>(code: S) -> Result<String, Error> {
         Self::parse(code)?.run()
     }
@@ -119,7 +124,8 @@ impl Brainfuck {
         Run some brainfuck with input.
 
         # Errors
-        May return an [`Error`] of kind [`UnmatchedBracket`](ErrorKind::UnmatchedBracket) or [`MaxSteps`](ErrorKind::MaxSteps).
+        May return an [`Error`] of kind [`UnmatchedBracket`](ErrorKind::UnmatchedBracket) or
+        [`MaxSteps`](ErrorKind::MaxSteps).
 
         # Example
         ```
@@ -133,7 +139,6 @@ impl Brainfuck {
         # Ok::<(), brainfrick::Error>(())
         ```
     */
-    #[inline]
     pub fn execute_with_input<O: Into<String>, R: AsRef<str>>(
         code: O,
         input: R,
@@ -167,13 +172,12 @@ impl Brainfuck {
         # Ok::<(), brainfrick::Error>(())
         ```
     */
-    #[inline]
     pub fn parse<S: Into<String>>(code: S) -> Result<Brainfuck, Error> {
-        func::parse(code.into(), Self::MAX_STEPS)
+        parse(code.into(), Self::MAX_STEPS)
     }
 
     /**
-        Run the brainfuck.
+        Run the parsed brainfuck.
 
         Note that, for a single [`Brainfuck`], this will always output the same result.
 
@@ -198,13 +202,12 @@ impl Brainfuck {
         # Ok::<(), brainfrick::Error>(())
         ```
     */
-    #[inline]
     pub fn run(&self) -> Result<String, Error> {
-        func::execute(self, None)
+        execute(self, None)
     }
 
     /**
-        Run the brainfuck with input.
+        Run the parsed brainfuck with input.
 
         # Errors
         May return a [`MaxSteps`](ErrorKind::MaxSteps) error.
@@ -220,13 +223,12 @@ impl Brainfuck {
         # Ok::<(), brainfrick::Error>(())
         ```
     */
-    #[inline]
     pub fn input<S: AsRef<str>>(&self, input: S) -> Result<String, Error> {
-        func::execute(self, Some(input.as_ref()))
+        execute(self, Some(input.as_ref()))
     }
 
     /**
-        The original, brainfuck 'source'.
+        The original brainfuck 'source'.
 
         # Example
         ```
@@ -237,7 +239,6 @@ impl Brainfuck {
         # Ok::<(), brainfrick::Error>(())
         ```
     */
-    #[inline]
     pub fn code(&self) -> &str {
         &self.code
     }

@@ -1,7 +1,7 @@
 use super::{
     error::{Error, ErrorKind},
     mem::Memory,
-    step::Step::*,
+    step::Step,
     Brainfuck,
 };
 use std::sync::Arc;
@@ -15,24 +15,12 @@ pub(crate) fn execute(brainfuck: &Brainfuck, input: Option<&str>) -> Result<Stri
 
     while index < brainfuck.steps.len() {
         match brainfuck.steps[index] {
-            Add(n) => mem.add(n),
-            Move(n) => mem.move_pointer(n),
-            Output => output.push(mem.cell()),
-            Input => mem.set_cell(input.next().unwrap_or(0)),
-            Loop(kind, jump) if kind.should_jump(&mem) => index = jump,
-            Debug => {
-                let (pointer, sign) = mem.pointer();
-                let s = format!(
-                    "[{}{},{}]",
-                    match sign {
-                        true => "",
-                        false => "-",
-                    },
-                    pointer,
-                    mem.cell(),
-                );
-                output.append(&mut s.into_bytes());
-            }
+            Step::Add(n) => mem.add(n),
+            Step::Move(n) => mem.move_pointer(n),
+            Step::Output => output.push(mem.get_cell()),
+            Step::Input => mem.set_cell(input.next().unwrap_or_default()),
+            Step::Loop(kind, jump) if kind.should_jump(&mem) => index = jump,
+            Step::Debug => mem.append_debug(&mut output),
             _ => (), // skipped loops
         }
 
@@ -43,22 +31,22 @@ pub(crate) fn execute(brainfuck: &Brainfuck, input: Option<&str>) -> Result<Stri
                 kind: ErrorKind::MaxSteps,
                 index: brainfuck.indexes[index],
                 brainfuck: Arc::clone(&brainfuck.code),
-                output: make_output(output),
+                output: parse_bytes(output),
             });
         }
     }
 
-    Ok(make_output(output).unwrap_or_default())
+    Ok(parse_bytes(output).unwrap_or_default())
 }
 
-// this function exists because Cow clones when using into_owned(), and we want to avoid that when possible
-fn make_output(output: Vec<u8>) -> Option<String> {
+// this func exists because Cow clones when using into_owned() & we want to avoid that when possible
+fn parse_bytes(output: Vec<u8>) -> Option<String> {
     use std::borrow::Cow;
     if output.is_empty() {
         None
     } else {
         Some(match String::from_utf8_lossy(&output) {
-            // safety: if the result is borrowed it is always valid utf-8
+            // safety: if the result is borrowed then it is always valid utf-8
             Cow::Borrowed(_) => unsafe { String::from_utf8_unchecked(output) },
             Cow::Owned(s) => s,
         })

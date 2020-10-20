@@ -1,6 +1,6 @@
 use std::{fmt, sync::Arc};
 
-/** An error originating from this crate. */
+/// An error originating from this crate.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Error {
     pub(crate) kind: ErrorKind,
@@ -11,25 +11,22 @@ pub struct Error {
 
 impl Error {
     /// The [`kind`](ErrorKind) of error.
-    #[inline]
     pub fn kind(&self) -> ErrorKind {
         self.kind
     }
 
     /// The line of brainfuck this error occurred on (starting from 0).
-    #[inline]
     pub fn line(&self) -> usize {
         self.index.line
     }
 
     /// The column of brainfuck this error occurred on (starting from 0).
-    #[inline]
     pub fn col(&self) -> usize {
         self.index.col
     }
 
     /**
-        The original, brainfuck 'source' this error came from.
+        The original brainfuck 'source' this error came from.
 
         If you don't like swearing, you may use [`Error::brainfrick`].
 
@@ -42,19 +39,16 @@ impl Error {
         assert_eq!(code, result.brainfuck());
         ```
     */
-    #[inline]
     pub fn brainfuck(&self) -> &str {
         &self.brainfuck
     }
 
     /// An alias for [`Error::brainfuck`].
-    #[inline]
     pub fn brainfrick(&self) -> &str {
         self.brainfuck()
     }
 
     /// The output produced before the error occurred, if applicable.
-    #[inline]
     pub fn output(&self) -> Option<&str> {
         self.output.as_deref()
     }
@@ -95,7 +89,7 @@ impl fmt::Display for Error {
     }
 }
 
-/** The types of [`Errors`](Error) that can be encountered. */
+/// The types of [`Errors`](Error) that can be encountered.
 #[non_exhaustive]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ErrorKind {
@@ -120,9 +114,7 @@ pub(crate) struct Index {
     pub col: usize,
 }
 
-// alternate syntax to create
 impl Index {
-    #[inline]
     pub fn new(line: usize, col: usize) -> Self {
         Self { line, col }
     }
