@@ -6,8 +6,8 @@ use super::{
 };
 use std::sync::Arc;
 
-pub(crate) fn execute(brainfuck: &Brainfuck, input: Option<&str>) -> Result<String, Error> {
-    let mut input = input.unwrap_or_default().bytes();
+pub(crate) fn real_execute(brainfuck: &Brainfuck, input: Option<&str>) -> Result<String, Error> {
+    let mut input = input.unwrap_or("").bytes();
     let mut output: Vec<u8> = Vec::new();
     let mut mem = Memory::new();
     let mut index: usize = 0;
@@ -18,7 +18,7 @@ pub(crate) fn execute(brainfuck: &Brainfuck, input: Option<&str>) -> Result<Stri
             Step::Add(n) => mem.add(n),
             Step::Move(n) => mem.move_pointer(n),
             Step::Output => output.push(mem.get_cell()),
-            Step::Input => mem.set_cell(input.next().unwrap_or_default()),
+            Step::Input => mem.set_cell(input.next().unwrap_or(0)),
             Step::Loop(kind, jump) if kind.should_jump(&mem) => index = jump,
             Step::Debug => mem.append_debug(&mut output),
             _ => (), // skipped loops

@@ -13,16 +13,16 @@ struct IndexedStep {
     index: Index,
 }
 
-pub(crate) fn parse(code: String, max_steps: usize) -> Result<Brainfuck, Error> {
+pub(crate) fn real_parse(code: String, max_steps: usize) -> Result<Brainfuck, Error> {
     let code = Arc::new(code);
 
-    let indexed_steps: Vec<IndexedStep> = code
-        .lines()
-        .enumerate()
-        .flat_map(|(line, content)| {
-            content.bytes().enumerate().filter_map(move |(col, byte)| {
-                // now we have both the line and col
-                let index = Index::new(line, col);
+    #[rustfmt::skip]
+    let indexed_steps: Vec<IndexedStep> =
+        code.lines().enumerate().flat_map(|(line_number, line_content)| {
+            line_content.bytes().enumerate().filter_map(move |(col_number, byte)| {
+                // all of that was just to get this index
+                let index = Index::new(line_number, col_number);
+                // now we interpret the byte...
                 match byte {
                     b'+' => Some(Step::Add(1)),
                     b'-' => Some(Step::Add(-1)),
@@ -35,24 +35,28 @@ pub(crate) fn parse(code: String, max_steps: usize) -> Result<Brainfuck, Error> 
                     b']' => Some(Step::Loop(LoopKind::End, 0)),
                     _ => None,
                 }
+                // ...and store the index with it
                 .map(|step| IndexedStep { step, index })
             })
         })
-        // optimization by combining repeated steps
+        // optimize by combining repeated steps
+        // TODO: remove itertools dependency and do this yourself
         .coalesce(|left, right| {
+            use Step::{Add, Move};
             match (left.step, right.step) {
-                (Step::Add(a), Step::Add(b)) => Some(Step::Add(a.wrapping_add(b))),
-                (Step::Move(a), Step::Move(b)) => {
-                    Some(Step::Move(a.checked_add(b).expect("Pointer overflow")))
-                }
+                (Add(a), Add(b)) => Some(Add(a.wrapping_add(b))),
+                (Move(a), Move(b)) => Some(
+                    // TODO: document this or make it an error
+                    // needs a gigantic string the size of half of the possible address space to
+                    // panic, which is insane and not even possible on most systems
+                    Move(a.checked_add(b).expect("Pointer overflow"))
+                ),
                 _ => None,
             }
-            .map_or(Err((left, right)), |combined| {
-                Ok(IndexedStep {
-                    step: combined,
-                    index: left.index,
-                })
-            })
+            .map_or(
+                Err((left, right)),
+                |combined_step| Ok(IndexedStep { step: combined_step, index: left.index }),
+            )
         })
         .collect();
 

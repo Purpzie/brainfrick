@@ -2,6 +2,7 @@ use std::{collections::VecDeque, convert::TryFrom};
 
 // to the user, the pointer appears to be able to become negative
 // however, it is just a normal usize pointer with an offset stored separately
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub(crate) struct Memory {
     cells: VecDeque<u8>,
     pointer: usize,
@@ -21,6 +22,7 @@ impl Memory {
 
     pub fn add(&mut self, amount: i8) {
         let c = &mut self.cells[self.pointer];
+        // i8 and u8 are the same size, so this does NOT saturate. it's valid!
         *c = c.wrapping_add(amount as u8);
     }
 
@@ -42,16 +44,17 @@ impl Memory {
             }
         } else {
             // moving left!
-            let amount = (-amount) as usize;
+            let amount = (-amount) as usize; // abs
             if self.pointer >= amount {
-                // safe to subtract
+                // there is space to the left
                 self.pointer -= amount;
             } else {
-                // not safe to subtract, we'll need to do some trickery here
+                // not enough space to the left, we'll need to expand the VecDeque
                 let offset = amount - self.pointer;
                 self.pointer = 0;
                 self.offset += offset;
 
+                // VecDeque doesn't have resize_front()
                 self.cells.reserve(offset);
                 for _ in 0..offset {
                     self.cells.push_front(0);

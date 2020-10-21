@@ -29,8 +29,8 @@ mod mem;
 mod parse;
 mod step;
 
-use execute::execute;
-use parse::parse;
+use execute::real_execute;
+use parse::real_parse;
 use std::sync::Arc;
 
 pub use error::{Error, ErrorKind};
@@ -87,6 +87,7 @@ pub use error::{Error, ErrorKind};
 pub struct Brainfuck {
     steps: Vec<step::Step>,
     indexes: Vec<error::Index>,
+    // this is an Arc so that errors don't need to clone it
     code: Arc<String>,
     /// The maximum number of 'steps' that will be run before stopping. Defaults to
     /// [`Brainfuck::MAX_STEPS`].
@@ -175,7 +176,7 @@ impl Brainfuck {
         ```
     */
     pub fn parse<S: Into<String>>(code: S) -> Result<Brainfuck, Error> {
-        parse(code.into(), Self::MAX_STEPS)
+        real_parse(code.into(), Self::MAX_STEPS)
     }
 
     /**
@@ -205,7 +206,7 @@ impl Brainfuck {
         ```
     */
     pub fn run(&self) -> Result<String, Error> {
-        execute(self, None)
+        real_execute(self, None)
     }
 
     /**
@@ -226,7 +227,7 @@ impl Brainfuck {
         ```
     */
     pub fn input<S: AsRef<str>>(&self, input: S) -> Result<String, Error> {
-        execute(self, Some(input.as_ref()))
+        real_execute(self, Some(input.as_ref()))
     }
 
     /**
