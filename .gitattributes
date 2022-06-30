@@ -1,2 +1,2 @@
-# force lf
 * text=auto eol=lf
+*.bf linguist-vendored
